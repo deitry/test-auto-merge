@@ -1,6 +1,10 @@
 name: Auto merge branches
 
-on: pull_request
+on:
+  pull_request:
+    types:
+      - opened
+      - labeled
 
 jobs:
   approve-and-merge:
