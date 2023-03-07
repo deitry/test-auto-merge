@@ -1,4 +1,4 @@
-name: Auto merge branches
+name: Create merge PR
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
     - 'main*'
 
 jobs:
-  merge:
+  create-merge:
     runs-on: ubuntu-latest
     permissions: write-all
 
