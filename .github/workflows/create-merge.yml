@@ -14,10 +14,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Create PR to main2
+      - id: create_pr
+        name: Create PR to main2
         if: ${{ github.ref_name == 'main' }}
         uses: repo-sync/pull-request@v2
         with:
           destination_branch: 'main2'
           github_token: ${{ secrets.GITHUB_TOKEN }}
           pr_label: "auto-pr"
+
+      - name: Approve Pull Request
+        uses: juliangruber/approve-pull-request-action@v2.0.0
+        with:
+          github-token: ${{ secrets.PAT }}
+          number: ${{ steps.pr_number.outputs.pr_number }}
+
+      - id: automerge
+        name: automerge
+        uses: pascalgn/automerge-action@v0.15.6
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          MERGE_LABELS: "auto-pr"
