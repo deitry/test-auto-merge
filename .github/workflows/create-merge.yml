@@ -38,8 +38,8 @@ jobs:
           MERGE_LABELS: "auto-pr"
 
       - name: Check automerge result
-        # if: ${{ steps.automerge.outputs.mergeResult != "merged" }}
-        if: ${{ steps.automerge.outputs.mergeResult == "not_ready" || steps.automerge.outputs.mergeResult == "merge_failed" }}
+        # if: ${{ steps.automerge.outputs.mergeResult != 'merged' }}
+        if: ${{ steps.automerge.outputs.mergeResult == 'not_ready' || steps.automerge.outputs.mergeResult == 'merge_failed' }}
         shell: bash
         run: |
           echo "Pull request was not merged!"
