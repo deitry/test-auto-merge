@@ -22,4 +22,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           target_branch: 'main2'
           title: Merge `main` to `main2`
-          reviewer: deitry
