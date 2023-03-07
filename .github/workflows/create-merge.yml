@@ -20,3 +20,4 @@ jobs:
         with:
           destination_branch: 'main2'
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_label: "auto-pr"
