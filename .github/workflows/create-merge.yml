@@ -14,6 +14,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # this step should be different for different branches to create appropriate PRs.
+      # e.g. main > main2, main2 > main3m, etc.
       - id: create_pr
         name: Create PR to main2
         if: ${{ github.ref_name == 'main' }}
@@ -21,11 +23,13 @@ jobs:
         with:
           destination_branch: 'main2'
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # label must be same that is used in automerge step
           pr_label: "auto-pr"
 
       - name: Approve Pull Request
         uses: juliangruber/approve-pull-request-action@v2.0.0
         with:
+          # we have to use token other than that was used to create this PR
           github-token: ${{ secrets.PAT }}
           number: ${{ steps.create_pr.outputs.pr_number }}
 
@@ -35,8 +39,10 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           PULL_REQUEST: ${{ steps.create_pr.outputs.pr_number }}
+          # it seems unnecessary if number is provided, but we'll keep it
           MERGE_LABELS: "auto-pr"
 
+      # if automerge failed to merge, it still results with success
       - name: Check automerge result
         # if: ${{ steps.automerge.outputs.mergeResult != 'merged' }}
         if: ${{ steps.automerge.outputs.mergeResult == 'not_ready' || steps.automerge.outputs.mergeResult == 'merge_failed' }}
