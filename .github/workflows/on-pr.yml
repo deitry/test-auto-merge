@@ -1,0 +1,25 @@
+name: Auto merge branches
+
+on: pull_request
+
+jobs:
+  approve-and-merge:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Approve Pull Request
+        uses: juliangruber/approve-pull-request-action@v2.0.0
+        with:
+          github-token: ${{ secrets.PAT }}
+          number: ${{ github.event.number }}
+
+      - id: automerge
+        name: automerge
+        uses: pascalgn/automerge-action@v0.15.6
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          MERGE_LABELS: "auto-pr"

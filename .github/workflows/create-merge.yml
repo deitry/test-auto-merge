@@ -1,0 +1,23 @@
+name: Create merge PR
+
+on:
+  push:
+    branches:
+    - 'main*'
+
+jobs:
+  create-merge:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create PR to main2
+        if: ${{ github.ref_name == 'main' }}
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: 'main2'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_label: "auto-pr"
