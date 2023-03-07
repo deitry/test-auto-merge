@@ -3,12 +3,11 @@ name: Auto merge branches
 on:
   pull_request:
     types:
-      - opened
       - labeled
 
 jobs:
   approve-and-merge:
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'auto-pr') }}
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'auto-pr') || github.event.label.name == 'auto-pr' }}
     runs-on: ubuntu-latest
     permissions: write-all
 
