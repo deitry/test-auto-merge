@@ -1,0 +1,20 @@
+name: Auto merge branches
+
+on:
+  push:
+    branches:
+    - 'main*'
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create PR to main2
+        if: ${{ github.ref_name == 'main' }}
+        uses: devops-infra/action-pull-request@v0.5.5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          target_branch: 'main2'
+          title: Merge `main` to `main2`
+          reviewer: deitry
