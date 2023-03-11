@@ -14,19 +14,47 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # this step should be different for different branches to create appropriate PRs.
-      # e.g. main > main2, main2 > main3m, etc.
+      - id: branches
+        shell: pwsh
+        run: |
+          # key - source branch, value - target branch
+          $mapBranches = @{
+            "main" = "main2"
+          }
+
+          $targetBranch = $mapBranches["${{ github.ref_name }}"]
+          $sourceBranch = "merge-${{ github.ref_name }}-to-$targetBranch"
+
+          "sourceBranch=$sourceBranch" >> $env:GITHUB_OUTPUT
+          "targetBranch=$targetBranch" >> $env:GITHUB_OUTPUT
+
+          echo "sourceBranch = $sourceBranch"
+          echo "targetBranch = $targetBranch"
+
+          # check if merge branch aready exists
+          $mergeBranchAlreadyExists = git ls-remote --heads https://github.com/revizto/revizto.git $sourceBranch
+
+          if (-not $mergeBranchAlreadyExists)
+          {
+            git checkout -b $sourceBranch
+            git push origin $sourceBranch
+
+            "merge=true" >> $env:GITHUB_OUTPUT
+          }
+
       - id: create_pr
-        name: Create PR to main2
-        if: ${{ github.ref_name == 'main' }}
+        name: Create merge request
+        if: ${{ steps.branches.outputs.merge }}
         uses: repo-sync/pull-request@v2
         with:
-          destination_branch: 'main2'
+          source_branch: ${{ steps.branches.outputs.sourceBranch }}
+          destination_branch: ${{ steps.branches.outputs.targetBranch }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # label must be same that is used in automerge step
           pr_label: "auto-pr"
 
       - name: Approve Pull Request
+        if: ${{ steps.branches.outputs.merge }}
         uses: juliangruber/approve-pull-request-action@v2.0.0
         with:
           # we have to use token other than that was used to create this PR
@@ -34,6 +62,7 @@ jobs:
           number: ${{ steps.create_pr.outputs.pr_number }}
 
       - id: automerge
+        if: ${{ steps.branches.outputs.merge }}
         name: automerge
         uses: pascalgn/automerge-action@v0.15.6
         env:
@@ -45,9 +74,8 @@ jobs:
       # if automerge failed to merge, it still results with success
       - name: Check automerge result
         # if: ${{ steps.automerge.outputs.mergeResult != 'merged' }}
-        if: ${{ steps.automerge.outputs.mergeResult == 'not_ready' || steps.automerge.outputs.mergeResult == 'merge_failed' }}
+        if: ${{ steps.branches.outputs.merge && (steps.automerge.outputs.mergeResult == 'not_ready' || steps.automerge.outputs.mergeResult == 'merge_failed') }}
         shell: bash
         run: |
           echo "Pull request was not merged!"
           exit 1
-
