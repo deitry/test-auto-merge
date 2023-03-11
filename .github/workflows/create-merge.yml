@@ -58,7 +58,7 @@ jobs:
         uses: juliangruber/approve-pull-request-action@v2.0.0
         with:
           # we have to use token other than that was used to create this PR
-          github-token: ${{ secrets.CI_BOT_TOKEN }}
+          github-token: ${{ secrets.PAT }}
           number: ${{ steps.create_pr.outputs.pr_number }}
 
       - id: automerge
