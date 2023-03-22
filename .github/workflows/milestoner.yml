@@ -14,7 +14,7 @@ jobs:
     steps:
     - name: Get milestone
       id: milestones
-      if: ${{ !contains(github.event.pull_request.title, 'merge') }}
+      if: ${{ !contains(github.event.pull_request.title, 'merge') && github.event.pull_request.milestone == null }}
       shell: pwsh
       run: |
         # key - source branch, value - target branch
@@ -30,14 +30,28 @@ jobs:
         echo "target milestone = $target"
 
     - uses: actions/github-script@v6
-      if: ${{ !contains(github.event.pull_request.title, 'merge') }}
+      if: ${{ steps.milestones.outputs.target }}
       with:
         script: |
-          let result = await github.rest.pulls.update({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: ${{ github.event.pull_request.number }},
-            milestone: "${{ steps.milestones.outputs.target }}"
+          let milestones = await github.rest.issues.listMilestones({
+            owner,
+            repo,
           });
 
-          console.log(result);
+          for (i = 0; i < milestones.length; i++) {
+            let milestone = milestones[i];
+            if (milestone.title == "${{ steps.milestones.outputs.target }}") {
+              console.log("found milestone ${{ steps.milestones.outputs.target }}, its number " + milestone.number);
+
+              let result = await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ${{ github.event.pull_request.number }},
+                milestone: milestone.number
+              });
+
+              console.log(result);
+
+              break;
+            }
+          }
