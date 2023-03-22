@@ -33,10 +33,10 @@ jobs:
       if: ${{ !contains(github.event.pull_request.title, 'merge') }}
       with:
         script: |
-          let result = await github.rest.issues.update({
+          let result = await github.rest.pulls.update({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            issue_number: ${{ github.event.pull_request.number }},
+            pull_number: ${{ github.event.pull_request.number }},
             milestone: "${{ steps.milestones.outputs.target }}"
           });
 
