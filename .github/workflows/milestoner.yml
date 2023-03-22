@@ -34,8 +34,8 @@ jobs:
       with:
         script: |
           let milestones = await github.rest.issues.listMilestones({
-            owner,
-            repo,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
           });
 
           for (i = 0; i < milestones.length; i++) {
