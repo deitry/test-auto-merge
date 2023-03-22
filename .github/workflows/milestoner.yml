@@ -1,0 +1,57 @@
+name: "Pull Request Labeler"
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+jobs:
+  labeler:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+    - name: Get milestone
+      id: milestones
+      if: ${{ !contains(github.event.pull_request.title, 'merge') && github.event.pull_request.milestone == null }}
+      shell: pwsh
+      run: |
+        # key - source branch, value - target branch
+        $mapMilestones = @{
+          "main" = "main"
+          "main2" = "main2"
+        }
+
+        $target = $mapMilestones["${{ github.event.pull_request.base.ref }}"]
+
+        "target=$target" >> $env:GITHUB_OUTPUT
+
+        echo "target milestone = $target"
+
+    - uses: actions/github-script@v6
+      if: ${{ steps.milestones.outputs.target }}
+      with:
+        script: |
+          let milestones = await github.rest.issues.listMilestones({
+            owner,
+            repo,
+          });
+
+          for (i = 0; i < milestones.length; i++) {
+            let milestone = milestones[i];
+            if (milestone.title == "${{ steps.milestones.outputs.target }}") {
+              console.log("found milestone ${{ steps.milestones.outputs.target }}, its number " + milestone.number);
+
+              let result = await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ${{ github.event.pull_request.number }},
+                milestone: milestone.number
+              });
+
+              console.log(result);
+
+              break;
+            }
+          }
