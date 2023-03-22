@@ -1,7 +1,5 @@
 name: "Pull Request Labeler"
-on:
-  pull_request_target:
-    types: [opened, reopened]
+on: pull_request
 
 jobs:
   labeler:
@@ -33,13 +31,21 @@ jobs:
       if: ${{ steps.milestones.outputs.target }}
       with:
         script: |
-          let milestones = await github.rest.issues.listMilestones({
+          let response = await github.rest.issues.listMilestones({
             owner: context.repo.owner,
             repo: context.repo.repo,
           });
 
+          let milestones = response.data;
+          console.log(milestones)
+
+          console.log("Total: " + milestones.length);
+
           for (i = 0; i < milestones.length; i++) {
             let milestone = milestones[i];
+
+            console.log(milestone.title + " " + milestone.number);
+
             if (milestone.title == "${{ steps.milestones.outputs.target }}") {
               console.log("found milestone ${{ steps.milestones.outputs.target }}, its number " + milestone.number);
 
