@@ -68,7 +68,7 @@ jobs:
 
             console.log(result);
 
-            let state = result.mergeable_state;
+            let state = result.data.mergeable_state;
             console.log("state = " + state);
             return state;
           result-encoding: string
