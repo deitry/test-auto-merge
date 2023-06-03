@@ -32,7 +32,7 @@ jobs:
           echo "targetBranch = $targetBranch"
 
           # check if merge branch aready exists
-          $mergeBranchAlreadyExists = git ls-remote --heads https://github.com/revizto/revizto.git $sourceBranch
+          $mergeBranchAlreadyExists = git ls-remote --heads origin $sourceBranch
 
           if (-not $mergeBranchAlreadyExists)
           {
